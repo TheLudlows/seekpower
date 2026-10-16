@@ -337,14 +337,14 @@ def percentiles(values):
             for p in (50, 95, 99)}
 
 
-def init_worker(port, key, path, payloads, warmup, ready, start, deadline):
+def init_worker(port, key, path, payloads, warmup, ready, start, deadline, client_factory):
     global worker_state
-    worker_state = port, key, path, payloads, warmup, ready, start, deadline
+    worker_state = port, key, path, payloads, warmup, ready, start, deadline, client_factory
 
 
 def query_worker(number):
-    port, key, path, payloads, warmup, ready, start, deadline = worker_state
-    client = Client(port, key)
+    port, key, path, payloads, warmup, ready, start, deadline, client_factory = worker_state
+    client = client_factory(port, key)
     latencies, engine_ms, response_bytes = [], [], 0
     position = number
     try:
@@ -371,7 +371,7 @@ def query_worker(number):
         client.close()
 
 
-def load(port, key, path, payloads, concurrency, args, pid):
+def load(port, key, path, payloads, concurrency, args, pid, client_factory=Client):
     # Separate Python processes avoid a shared GIL becoming the concurrency limit.
     context = multiprocessing.get_context('fork')
     ready = context.Barrier(concurrency + 1)
@@ -379,7 +379,7 @@ def load(port, key, path, payloads, concurrency, args, pid):
     deadline = context.Value('d', 0.0, lock=False)
     with ProcessPoolExecutor(max_workers=concurrency, mp_context=context,
             initializer=init_worker,
-            initargs=(port, key, path, payloads, args.warmup, ready, start, deadline)) as pool:
+            initargs=(port, key, path, payloads, args.warmup, ready, start, deadline, client_factory)) as pool:
         futures = [pool.submit(query_worker, i) for i in range(concurrency)]
         ready.wait(timeout=180)
         with Measurement(pid) as measurement:

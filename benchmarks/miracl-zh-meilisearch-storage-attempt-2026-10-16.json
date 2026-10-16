@@ -1,0 +1,71 @@
+{
+  "status": "aborted_before_full_corpus",
+  "engine": "Meilisearch",
+  "version": {
+    "commitSha": "420ff1362801adb58c938aec89700e8f7e32e566",
+    "commitDate": "2026-10-12T08:45:13.000000000Z",
+    "pkgVersion": "1.55.0"
+  },
+  "benchmark_commit": "58ec8a55cd1e6d1625534a3e341edc456586eca4",
+  "binary_sha256": "7e33f5889235f14290074a19a6d3574bd9b10fb2ee8731eabb7dafd0714b0513",
+  "reason": "Stopped by operator based on storage growth, not a measured out-of-disk failure. At least 1,200,000 documents completed; database allocated 10.76 GiB versus roughly 20 GiB available for database during input staging. Full-corpus capacity was not measured.",
+  "last_observed_completed_documents": 1200000,
+  "target_documents": 4934368,
+  "allocated_bytes_at_stop": 11554127872,
+  "logical_bytes_at_stop": 11554033962,
+  "free_disk_bytes_at_stop": 13569830912,
+  "config": {
+    "proximityPrecision": "byWord",
+    "text_normalization": "t2s",
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "container_memory_bytes": 8589934592,
+    "indexing_memory": "4 GiB",
+    "indexing_threads": 4,
+    "batch_size": 500,
+    "wait_every": 100,
+    "max_rss_mib": 0
+  },
+  "dataset": {
+    "name": "MIRACL/zh",
+    "split": "dev",
+    "qrels_file": "qrels/dev.tsv",
+    "documents": 4934368,
+    "queries": 393,
+    "source_documents": 4934368,
+    "full_corpus": true,
+    "tokenizer": "UnicodeAlphanumericZH",
+    "selection": "full corpus",
+    "judged_documents": 3786,
+    "judgments": 3928,
+    "corpus_revision": "d921ec7e349ce0d28daf30b2da9da5ee698bef0d",
+    "labels_revision": "5be20db9509754dadad47689368639fcec739c00",
+    "source_sha256": {
+      "docs-0.jsonl.gz": "b036ba6a927a4598b314de55a1de200d2a619b28b4327f49e97ec4233d324827",
+      "docs-1.jsonl.gz": "d6db9e242bdebeac76f586c0ec9a6301a9ec4a52c64c71949945ba5983467506",
+      "docs-2.jsonl.gz": "29f1b1e3bec59770367be71d1698a7afaf7efb8006d168d40a2815025c8d1b43",
+      "docs-3.jsonl.gz": "9cfc76c7f9ec9edc12d351913ba0f33a96d496a7449b46a6488f77668acf178d",
+      "docs-4.jsonl.gz": "d47cef57928c3452d95cc8499dea37ce6e589808a9315ab2cf9809a23fe349b5",
+      "docs-5.jsonl.gz": "17e1d4bf36d3992ccf5c519522ed1dcf896cb72772907e973bfcf1b2dd993e28",
+      "docs-6.jsonl.gz": "4b3cdc7aeefc01ca4c2f55ba16ac80d773393068b78d4f971fc3c25c6fb9a859",
+      "docs-7.jsonl.gz": "e7541af8c2fb7a96cff271e06047f0b4f00372b205735fabeed6217f9a7bb334",
+      "docs-8.jsonl.gz": "f456671170b8286ede8f81feb9d365750af5027465399f63445a441fc96c41a7",
+      "docs-9.jsonl.gz": "6c8193e14aafd93fb1ee57eac4f1171a44a0c975ebdefd6e9df1903c1b2fd7ca",
+      "topics.miracl-v1.0-zh-dev.tsv": "5b284a9aabf08bb2d1c88ed7ea276025c9d23846457c5350dc8d391b5e0d0a13",
+      "qrels.miracl-v1.0-zh-dev.tsv": "5546474d3dc8139014e6571e9f4041848bb0a314ca6d2d4bac708174d71c59eb"
+    },
+    "dimensions": 0,
+    "files_sha256": {
+      "corpus.jsonl": "11fd61cb0e2e4aa70c3a407884e31e8972a68a4ef1dc7ec8a4716862a9cc366d",
+      "queries.jsonl": "938df496b11c0f4e5a26f4f277720ff97e883e49c9c600153ba6f3d9f918f565",
+      "qrels/dev.tsv": "d7c9e802d30a05dfe4e6f5de74c15e3baf10c6bcdf58721cfae4ad49aeb610d8"
+    },
+    "preparation_sha256": "2d0118329649913084573364fe2866f22b998b0a234a7f5c53b1e4415160b6b9"
+  },
+  "included_in_full_corpus_results": false,
+  "note": "TTY interruption terminated the process before its final report was written. This record preserves observed progress and disk usage; no quality, latency or completed-ingest throughput is claimed."
+}

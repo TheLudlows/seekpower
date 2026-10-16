@@ -128,6 +128,39 @@ done
 
 转换预先完成，不计入 HTTP 延迟或写入时间；完整文档转换累计 43.19 秒，查询转换 P95 为 0.00221 ms，整个输入准备阶段为 43.03 / 91.85 秒。它们是客户端测量，不代表接入引擎后的开销。两组都额外传输 `search_body`，写入吞吐不能直接与旧版单字段基线比较。原文返回已通过 HTTP 检查；OpenCC 配置、词典/实现哈希、逐查询指标均保存在 JSON 中。
 
+Meilisearch 对照复用上述数据加载、相关性指标及多进程 HTTP 压测逻辑。官方 v1.55.0 Linux amd64 二进制 SHA-256 为 `7e33f5889235f14290074a19a6d3574bd9b10fb2ee8731eabb7dafd0714b0513`。准备相同全文语料后运行：
+
+```sh
+taskset -c 0-3 python3 scripts/meilisearch_baseline.py \
+  --server /path/to/meilisearch --dataset /tmp/miracl-text \
+  --work-dir /tmp/meilisearch-miracl --text-normalization t2s \
+  --proximity-precision byAttribute \
+  --output benchmarks/miracl-zh-meilisearch-byattribute-2026-10-16.json
+```
+
+固定 4 个索引线程、4 GiB 索引内存预算，在同一 8 GiB 容器内运行。默认不额外按 RSS 中止，以允许映射文件页回收；可通过 `--max-rss-mib` 设置阈值。每批 500 段，每 100 批等待全部异步任务成功，写入时间包含索引完成；保留数据库和日志供检查。仅 `search_body` 可搜索，返回 `record_id` 和原文 `body`。保留默认排序规则顺序、容错、前缀和语言检测，邻近度按指定配置计算，`matchingStrategy=last`；默认结果总数为有上限的估算，与 SeekPower 的 OR 查询和精确计数不同。Meilisearch 内部还会存储 `search_body`，因此磁盘占用也不是相同存储布局的对比。原始结果记录版本、哈希、实际设置、逐查询指标和资源使用；失败任务或降级响应不会被计为成功基准。每组写入后保存 `.partial.json` 检查点，完成后由最终报告替代。
+
+默认 `byWord` 两次未完成：首次在完成 55 万段后触发额外的 6500 MiB RSS 阈值；第二次取消该阈值后，完成至少 120 万段时数据库达到 10.76 GiB，基于磁盘增长趋势主动中止，并非实测磁盘耗尽。两次记录保留在 `benchmarks/miracl-zh-meilisearch-{rss,storage}-attempt-2026-10-16.json`，不计为全量成绩。随后使用 `byAttribute` 继续验证完整语料：它降低邻近度精度，排序不再采用逐词间距，不能将其成绩归为默认 Meilisearch；省略该参数可复现默认配置。
+
+全量 `byAttribute` 已完成，源码 `0d7d75a`；4,934,368 段全部入库，393 条查询全部评估。原始语料、查询 ID、归一化请求体和 OpenCC 文件哈希与 SeekPower 对照一致，6 轮计时共 1,733 次请求零错误。
+
+| 指标 | [SeekPower 原分词器](https://github.com/TheLudlows/seekpower/blob/9c6678043c361334913c9b9d56cd544a377a33c4/benchmarks/miracl-zh-tokenizer-reference-2026-10-16.json) | [SeekPower jieba HMM 关](https://github.com/TheLudlows/seekpower/blob/9c6678043c361334913c9b9d56cd544a377a33c4/benchmarks/miracl-zh-tokenizer-jieba-no-hmm-2026-10-16.json) | [Meilisearch byAttribute](benchmarks/miracl-zh-meilisearch-byattribute-2026-10-16.json) |
+| --- | ---: | ---: | ---: |
+| nDCG@10 | 0.1618 | 0.1606 | 0.1299 |
+| Recall@10 | 23.46% | 23.00% | 19.12% |
+| Recall@100 | 53.72% | 54.12% | 39.61% |
+| MRR@10 | 0.1875 | 0.1855 | 0.1429 |
+| 并发 1 QPS / P95 ms | 109.3 / 21.41 | 119.9 / 16.96 | 25.5 / 83.48 |
+| 并发 4 QPS / P95 ms | 134.2 / 61.75 | 137.3 / 62.95 | 93.6 / 76.99 |
+| 写入完成秒数 | 575.82 | 439.83 | 1897.46 |
+| 数据库实际分配 GiB | 2.622 | 2.608 | 12.383 |
+| 写入峰值 RSS GiB | 3.191 | 3.095 | 7.285 |
+| 查询计时峰值 RSS GiB | 4.893 | 4.803 | 1.315 |
+
+这个 Meilisearch 配置在本数据集上的检索质量较低：相对 HMM 关闭组，nDCG@10 差值 -0.03070（75 条改善、116 条退化），Recall@100 差值 -0.14512（70 条改善、137 条退化）。逐查询配对 bootstrap（NumPy，种子 20261016，10,000 次）的 95% 百分位区间分别为 [-0.05818, -0.00399]、[-0.19437, -0.09465]。这不是默认 `byWord` 的全量成绩，也不能把差异只归因于分词器；匹配与排序策略均不同。
+
+延迟采用相同闭环驱动、每轮 5 秒、每种并发 3 轮，但各 worker 从查询池起点顺序请求，较慢的引擎会消费更短的查询前缀：本轮单并发每轮仅 118 / 129 / 128 次请求。因此上表延迟/QPS 仅是现有驱动下的观测，不是严格相同请求序列的性能排名；不能把它等同于覆盖全部 393 条查询的延迟分布。质量指标确实覆盖全部查询。写入各测一次，Meilisearch 计时包含异步完成等待及轮询；其查询 RSS 较低，建索引 RSS 和磁盘占用较高。Meilisearch 报告的有效索引空间约 8.01 GiB，数据库文件还包含可复用页面，不能把 12.38 GiB 全部视为有效数据。官方预编译二进制与 SeekPower 本地 native 构建也有差异。
+
 ## 开发与文档
 
 - [Rust 示例](docs/library-examples.md)、[元数据过滤与排序](FACETED_SEARCH.md)、[N-gram 配置](NGRAM_SEARCH.md)。本地执行 `cargo doc --workspace --no-deps` 生成与当前源码一致的 Rust 文档。
