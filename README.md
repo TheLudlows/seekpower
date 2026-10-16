@@ -128,6 +128,48 @@ done
 
 转换预先完成，不计入 HTTP 延迟或写入时间；完整文档转换累计 43.19 秒，查询转换 P95 为 0.00221 ms，整个输入准备阶段为 43.03 / 91.85 秒。它们是客户端测量，不代表接入引擎后的开销。两组都额外传输 `search_body`，写入吞吐不能直接与旧版单字段基线比较。原文返回已通过 HTTP 检查；OpenCC 配置、词典/实现哈希、逐查询指标均保存在 JSON 中。
 
+独立分词器实验固定上述 `t2s`、全文字段和四核配置。对照使用 `3693bbf`，HMM 开启组使用 `54499af`，关闭组使用 `46dc886`：均为 `jieba-rs = 0.11.0`、普通 `cut` 模式、默认词典，后一组仅关闭 HMM。两者词典的 349,045 个词及词频完全相同；ASCII 片段继续原样保留。此实验分支临时替换 `UnicodeAlphanumericZH` 的后端，必须重建索引，不能与旧分词器混用已有索引。
+
+| 指标 | [当前分词器](benchmarks/miracl-zh-tokenizer-reference-2026-10-16.json) | [jieba HMM 开](benchmarks/miracl-zh-tokenizer-jieba-2026-10-16.json) | [jieba HMM 关](benchmarks/miracl-zh-tokenizer-jieba-no-hmm-2026-10-16.json) |
+| --- | ---: | ---: | ---: |
+| nDCG@10 | 0.1618 | 0.1515 | 0.1606 |
+| Recall@10 | 23.46% | 21.94% | 23.00% |
+| Recall@100 | 53.72% | 52.26% | 54.12% |
+| MRR@10 | 0.1875 | 0.1734 | 0.1855 |
+| 并发 1 QPS / P95 ms | 109.3 / 21.41 | 95.1 / 23.35 | 119.9 / 16.96 |
+| 并发 4 QPS / P95 ms | 134.2 / 61.75 | 139.6 / 60.56 | 137.3 / 62.95 |
+| 写入与提交秒数 | 575.82 | 471.26 | 439.83 |
+| 逻辑索引 GiB | 2.621 | 2.716 | 2.608 |
+| 服务端峰值 RSS GiB | 4.893 | 4.962 | 4.803 |
+
+完整 4,934,368 段、393 条查询，三组共 18 轮、10,774 次计时请求零错误，归一化请求体、查询和字段配置的哈希/内容一致。对照组逐查询质量与上一轮完全一致。HMM 开启组相对原分词器的 nDCG@10 有 45 条改善、65 条退化；Recall@100 有 16 条改善、22 条退化。对逐查询差值做配对 bootstrap（种子 20261016，10,000 次），nDCG@10 差值 95% 百分位区间为 [-0.01979, -0.00099]；Recall@100 为 [-0.03246, 0.00238]。本测试集不支持直接替换为该配置。
+
+关闭 HMM 后，相对开启组，nDCG@10 增加 0.00908（55 条改善、34 条退化），Recall@100 增加 1.86 个百分点（18 条改善、6 条退化）；同一配对 bootstrap 方法的差值区间分别为 [0.00089, 0.01730]、[0.00722, 0.03221]。相对原分词器，nDCG@10 差值 -0.00125（41 条改善、34 条退化），Recall@100 差值 +0.00403（15 条改善、9 条退化），区间分别为 [-0.00660, 0.00421]、[-0.00869, 0.01724]，不能据此认定优于原分词器或证明等效。HMM 关闭组值得继续做集成验证，当前仍保持实验状态。
+
+[三组同进程分词对照](benchmarks/miracl-zh-segmentation-hmm-ablation-2026-10-16.json)使用相同输入，一次预热、三轮轮换顺序计时：原分词器 / HMM 开 / HMM 关处理 10,000 段分别为 0.663 / 0.216 / 0.204 秒，393 条查询合计 0.796 / 0.280 / 0.313 ms。与下面历史计时存在环境波动，只比较本轮内三组；查询总耗时很短，不宣称关闭 HMM 稳定更快。HMM 开关改变 43 条查询切词；关闭后 390 条与原分词器相同，余下三条均涉及“哪种”的拆分。“魏博现”查询的 Recall@100 从 0 恢复为 1，“李荣浩”和“周深”查询从 0 变为 1/3，但两者前十名仍未命中。开关同时影响文档与查询，不能把质量变化全部归因于查询端。
+
+[独立分词计时与查询切词对照](benchmarks/miracl-zh-segmentation-2026-10-16.json)：同一批已繁转简的前 10,000 段文本，分词中位耗时 1.728 / 0.633 秒；393 条查询合计 4.408 / 1.313 ms。排除初始化、大小写转换和片段切分，保留两组相同的 ASCII 旁路及字符串输出分配；一次预热、三轮交替顺序计时。这是局部分词成本，不是端到端延迟，也不是子集相关性评估。44 条查询切词变化；查询切词不变的 349 条也有质量变化，不能把全部差异归因于查询端 HMM。
+
+复现完整检索实验：分别检出上述三个提交、各自构建 release，使用上一节的完整全文命令，三次均设 `--text-normalization t2s` 并使用不同输出路径。复现分词计时：在 `46dc886` 运行以下命令复现三组计时（将语料目录改为实际路径；`54499af` 为历史两组计时）；输出未附加的输入/词典哈希和环境记录可在已提交结果中核对。
+
+```sh
+python3 - <<'PYCODE' > /tmp/tokenizer-samples.jsonl
+import itertools, json, pathlib, opencc
+root = pathlib.Path('/tmp/miracl-text')
+convert = opencc.OpenCC('t2s.json').convert
+for kind, name, limit in [('query', 'queries.jsonl', 393), ('document', 'corpus.jsonl', 10000)]:
+    with (root / name).open() as stream:
+        for line in itertools.islice(stream, limit):
+            row = json.loads(line)
+            text = row['text'] if kind == 'query' else (row.get('title', '') + '\n' + row['text']).strip()
+            print(json.dumps({'kind': kind, 'id': row['_id'], 'text': convert(text)}, ensure_ascii=False))
+PYCODE
+cargo build --release -p seekpower --example compare_zh_tokenizers
+taskset -c 0-3 target/release/examples/compare_zh_tokenizers /tmp/tokenizer-samples.jsonl > /tmp/tokenizer-segmentation.json
+```
+
+写入各测一次，查询单轮有明显波动，不宣称稳定的整体性能提升。首次对照在约 190 万条后因执行环境连接中断而未完成，已另行完整补跑；中断轮次不计入结果。词项/位置、标点、中英混排、提交重开后的短语检索及 HTTP 原文返回检查通过；另发现现有 `中国 -北京` 排除行为在两个后端均不正确，本轮未修改查询语法。当前无高亮实现。jieba 默认词典间接引入 `zstd`，触发现有依赖裁剪 CI 检查；检查保留，实验不作为生产合入方案。
+
 ## 开发与文档
 
 - [Rust 示例](docs/library-examples.md)、[元数据过滤与排序](FACETED_SEARCH.md)、[N-gram 配置](NGRAM_SEARCH.md)。本地执行 `cargo doc --workspace --no-deps` 生成与当前源码一致的 Rust 文档。

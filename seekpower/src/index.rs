@@ -24,7 +24,7 @@ use tokio::sync::{RwLock, Semaphore};
 use utils::{read_u32, write_u16};
 
 #[cfg(feature = "zh")]
-use crate::word_segmentation::WordSegmentationTM;
+use jieba_rs::Jieba;
 use crate::{
     INDEX_RUNTIME,
     add_result::{self, B, K, SIGMA},
@@ -845,7 +845,7 @@ pub struct Shard {
     pub(crate) string_set_to_single_term_id_vec: Vec<AHashMap<String, AHashSet<u32>>>,
 
     #[cfg(feature = "zh")]
-    pub(crate) word_segmentation_option: Option<WordSegmentationTM>,
+    pub(crate) word_segmentation_option: Option<Jieba>,
 
     pub(crate) shard_number: usize,
     pub(crate) index_option: Option<Arc<RwLock<Index>>>,
@@ -1541,9 +1541,7 @@ pub(crate) fn create_shard(
             #[cfg(feature = "zh")]
             let word_segmentation_option = if meta.tokenizer == TokenizerType::UnicodeAlphanumericZH
             {
-                let mut word_segmentation = WordSegmentationTM::new();
-                word_segmentation.load_dictionary(0, 1, true);
-                Some(word_segmentation)
+                Some(Jieba::new())
             } else {
                 None
             };

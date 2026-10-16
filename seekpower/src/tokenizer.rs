@@ -116,6 +116,21 @@ pub fn fold_diacritics_accents_ligatures_zalgo_umlaut(string: &str) -> String {
         })
 }
 
+#[cfg(feature = "zh")]
+fn segment_zh(index: &Shard, text: &str) -> Vec<String> {
+    if text.is_ascii() {
+        return vec![text.to_owned()];
+    }
+    index
+        .word_segmentation_option
+        .as_ref()
+        .unwrap()
+        .cut(text, false)
+        .into_iter()
+        .map(|token| token.word.to_owned())
+        .collect()
+}
+
 /// Tokenizer splits text to terms
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::assigning_clones)]
@@ -292,12 +307,8 @@ pub(crate) async fn tokenizer(
                         }
                         _ => {
                             if start {
-                                let result = index
-                                    .word_segmentation_option
-                                    .as_ref()
-                                    .unwrap()
-                                    .segment(&text_normalized[start_pos..char.0], true);
-                                non_unique_terms_line_string.extend(result.0);
+                                non_unique_terms_line_string
+                                    .extend(segment_zh(index, &text_normalized[start_pos..char.0]));
                             }
                             false
                         }
@@ -444,12 +455,8 @@ pub(crate) async fn tokenizer(
 
                         _ => {
                             if start {
-                                let result = index
-                                    .word_segmentation_option
-                                    .as_ref()
-                                    .unwrap()
-                                    .segment(&text_normalized[start_pos..char.0], true);
-                                non_unique_terms_line_string.extend(result.0);
+                                non_unique_terms_line_string
+                                    .extend(segment_zh(index, &text_normalized[start_pos..char.0]));
                             }
                             false
                         }
@@ -463,27 +470,15 @@ pub(crate) async fn tokenizer(
     if tokenizer == TokenizerType::UnicodeAlphanumericZH {
         if start {
             if first_part.len() >= 2 {
-                let result = index
-                    .word_segmentation_option
-                    .as_ref()
-                    .unwrap()
-                    .segment(first_part, true);
-                non_unique_terms_line_string.extend(result.0);
+                non_unique_terms_line_string.extend(segment_zh(index, first_part));
             } else {
-                let result = index
-                    .word_segmentation_option
-                    .as_ref()
-                    .unwrap()
-                    .segment(&text_normalized[start_pos..text_normalized.len()], true);
-                non_unique_terms_line_string.extend(result.0);
+                non_unique_terms_line_string.extend(segment_zh(
+                    index,
+                    &text_normalized[start_pos..text_normalized.len()],
+                ));
             }
         } else if !first_part.is_empty() {
-            let result = index
-                .word_segmentation_option
-                .as_ref()
-                .unwrap()
-                .segment(first_part, true);
-            non_unique_terms_line_string.extend(result.0);
+            non_unique_terms_line_string.extend(segment_zh(index, first_part));
         }
         non_unique_terms_line = non_unique_terms_line_string
             .iter()
@@ -1360,6 +1355,13 @@ mod tests {
                 ("中国 rust", vec!["中国", "rust"]),
                 ("rust 中国", vec!["rust", "中国"]),
                 ("江苏省会是哪里", vec!["江苏省", "会", "是", "哪里"]),
+                ("南京市长江大桥", vec!["南京市", "长江大桥"]),
+                ("北京大学", vec!["北京大学"]),
+                ("李荣浩有哪些作品", vec!["李", "荣", "浩", "有", "哪些", "作品"]),
+                ("魏博现", vec!["魏", "博", "现"]),
+                ("周深", vec!["周", "深"]),
+                ("OpenAI发布Rust2026", vec!["openai", "发布", "rust2026"]),
+                ("C++ C# Rust-2026", vec!["c++", "c#", "rust-2026"]),
             ] {
                 for suffix in ["", "。", " "] {
                     for is_query in [false, true] {

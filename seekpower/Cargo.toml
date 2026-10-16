@@ -17,14 +17,19 @@ publish = false
 # Optional features: zh=Chinese word segmentation, vb=result diagnostics.
 # You can also disable all default features and re-enable them case-wise in your toml with: seekpower = { path = "../seekpower", default-features = false, features = ["zh"] }
 default = ["zh","vb"]
-zh = []
+zh = ["dep:jieba-rs"]
 vb = []
 
 [lib]
 name = "seekpower"
 path = "src/lib.rs"
 
+[[example]]
+name = "compare_zh_tokenizers"
+required-features = ["zh"]
+
 [dependencies]
+jieba-rs = { version = "=0.11.0", optional = true }
 log = "0.4"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["preserve_order"] }

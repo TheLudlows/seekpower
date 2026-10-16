@@ -68,8 +68,6 @@ pub mod utils;
 pub mod vector;
 /// Vector quantization and similarity measure definitions for vector search.
 pub mod vector_similarity;
-#[cfg(feature = "zh")]
-pub(crate) mod word_segmentation;
 
 
 mod metadata_filter;
