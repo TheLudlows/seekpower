@@ -52,6 +52,82 @@ cargo run -p seekpower_server -- local_ip=127.0.0.1 local_port=8080
 
 仅文本执行全文检索，仅 `query_vector` 执行向量检索，两者都有执行混合检索。空对象 `{}` 浏览文档；查询默认包含未提交写入，持久化仍需提交。写入必须包含所有已配置的向量字段。二进制向量字段仍以 base64 字符串放在 JSON 中，与已删除的 v2 二进制查询协议无关。
 
+## 性能基线
+
+Linux 下使用独立临时目录启动 release 服务，通过本机 HTTP 长连接测量；只需为压测脚本安装 NumPy：
+
+```sh
+cargo build --release -p seekpower_server
+python3 -m pip install numpy
+python3 scripts/performance_baseline.py --output /tmp/seekpower-baseline.json
+```
+
+默认固定种子生成 20,000 篇合成文档、128 维向量和 64 个查询，测全文/向量/混合检索，并发 1、4，每组预热后运行 5 秒、重复 3 次。使用默认计数和正文返回，Top-10；向量采用 HTTP 默认的全簇检索。每个连接由独立进程驱动，压测端与服务共享机器资源。
+
+JSON 记录每轮 QPS、HTTP P50/P95/P99、服务端/压测端 CPU、服务端采样 RSS、索引磁盘占用，以及单次批量写入和提交耗时。汇总值为各轮指标的中位数；向量 Recall@10 对照独立 float64 全量余弦计算，全文核对匹配计数。请求失败会中止，不产生成功结果文件。
+
+[首版实测数据](benchmarks/http-baseline-2026-10-15.json) 包含源码与二进制哈希、数据哈希、配置和环境。结果用于同环境版本对比：属于合成数据的热缓存、闭环负载，不是容量上限；未衡量真实语料的全文/混合相关性、冷缓存、过滤和混合读写。提交耗时表示 API 完成时间，不验证崩溃恢复或持久化保证。`--help` 可查看数据量、维度、时长和并发等覆盖参数；输出文件不会被覆盖。
+
+真实语料使用完整 [BEIR SciFact](https://github.com/beir-cellar/beir)：5,183 篇文档、300 条测试查询。固定 `intfloat/multilingual-e5-small` 模型版本，CPU ONNX FP32 推理、384 维、最长 512 token、带掩码均值池化和 L2 归一化；查询/文档分别加 `query: `/`passage: ` 前缀。向量预先生成，耗时单独记录：
+
+```sh
+python3 -m pip install numpy==2.2.6 onnxruntime==1.23.2 tokenizers==0.22.2
+python3 scripts/prepare_retrieval.py --cache /tmp/seekpower-model --output /tmp/seekpower-scifact
+python3 scripts/performance_baseline.py --dataset /tmp/seekpower-scifact --output /tmp/seekpower-scifact-result.json
+```
+
+正文合并标题和文本，全文/混合请求显式使用 `operator=or`；其他 HTTP 配置不变。性能测 Top-10，相关性另取 Top-100，按人工标注计算 nDCG@10、Recall@100、MRR@10；最近邻 Recall@10 单独列出。[SciFact 实测数据](benchmarks/scifact-baseline-2026-10-15.json) 保留模型和输入哈希。SciFact 结果不代表百万级索引表现。模型、数据和向量保留在指定缓存/输出目录，不提交仓库。
+
+MIRACL 中文使用固定版本的官方完整语料（4,934,368 段）、393 条开发集查询和 3,928 条正负相关性标注，自动选择 `UnicodeAlphanumericZH` 分词。完整语料准备、嵌入和压测命令：
+
+```sh
+python3 scripts/prepare_retrieval.py --dataset miracl-zh --cache /tmp/miracl-cache --output /tmp/miracl-full
+python3 scripts/performance_baseline.py --dataset /tmp/miracl-full --commit-every 20 --output /tmp/miracl-full-result.json
+```
+
+准备程序按块生成向量并记录进度；中断后使用相同命令续跑，校验输入和模型一致性。完成的输出不会覆盖。压测使用磁盘请求缓存、内存映射向量和分块精确余弦参考，不会构造全量查询×文档矩阵；`--commit-every 20` 每 20 个批次提交一次以限制未提交数据，耗时计入写入阶段。服务端自身的资源需求仍随数据量增长。
+
+资源有限时，显式加 `--documents 10000` 生成子集：保留全部开发集正负标注文档，并从全语料按固定 SHA-256 顺序补足背景文档。报告标记 `full_corpus=false`，这种筛选降低检索难度，不能与官方全量成绩比较。仅准备全文数据可用 `--text-only`，压测对应使用 `--modes lexical`。`--max-rss-mib` 可设置写入时的服务端内存保护阈值，超限失败不会输出成功报告。
+
+本机实测分开保存：
+
+- [493 万条全文结果（末尾分词修复前）](benchmarks/miracl-zh-full-lexical-2026-10-16.json)：4 核 CPU 亲和性、每 100 批提交一次，完整 393 条查询。该配置并发 4 的 QPS 约 145、P95 约 58.6 ms；nDCG@10 为 0.1467、Recall@10 为 20.52%、Recall@100 为 46.66%。
+- [一万条子集三模式结果](benchmarks/miracl-zh-10k-baseline-2026-10-16.json)：默认 CPU 亲和性，保留全部 3,786 篇被标注文档并补足背景样本。该子集的纯向量 nDCG@10 为 0.7177，混合为 0.6391，不能据此推断全量结果。
+- [未完成的尝试](benchmarks/miracl-zh-full-resource-attempt-2026-10-16.json)：默认多分片运行在约 96 万条触发主动 RSS 保护；第一次 4 核运行被执行环境中断。它们不参与成功结果统计。全量向量/混合尚未实测。
+
+复现本次完整全文配置（将 `0-3` 换成机器实际可用的四个 CPU）：
+
+```sh
+python3 scripts/prepare_retrieval.py --dataset miracl-zh --text-only --cache /tmp/miracl-cache --output /tmp/miracl-text
+taskset -c 0-3 python3 scripts/performance_baseline.py --dataset /tmp/miracl-text --modes lexical --commit-every 100 --max-rss-mib 6500 --output /tmp/miracl-text-result.json
+```
+
+人工标注指标包含 nDCG@10、Recall@10、Recall@100、MRR@10，与向量最近邻 Recall 分开记录。CI 只运行指标、分块参考检索和流式加载的轻量测试，不下载语料或执行性能门槛判断。
+
+末尾分词修复后的独立简繁实验使用同一二进制、完整语料和上述四核配置，分别重建索引。两组均以 `body` 保存原文、仅索引不返回的 `search_body`；`identity` 原样输入，`t2s` 在客户端用固定 OpenCC 1.4.2 归一化文档和查询。未更换分词器或修改引擎默认值。
+
+```sh
+python3 -m pip install OpenCC==1.4.2
+for mode in identity t2s; do
+  taskset -c 0-3 python3 scripts/performance_baseline.py --dataset /tmp/miracl-text --modes lexical --commit-every 100 --max-rss-mib 6500 --text-normalization "$mode" --output "/tmp/miracl-$mode.json"
+done
+```
+
+| 指标 | [原样对照](benchmarks/miracl-zh-fixed-identity-2026-10-16.json) | [繁转简](benchmarks/miracl-zh-fixed-t2s-2026-10-16.json) |
+| --- | ---: | ---: |
+| nDCG@10 | 0.1467 | 0.1618 |
+| Recall@10 | 20.52% | 23.46% |
+| Recall@100 | 46.66% | 53.72% |
+| MRR@10 | 0.1689 | 0.1875 |
+| 并发 1 QPS / P95 ms | 108.6 / 18.59 | 118.7 / 17.61 |
+| 并发 4 QPS / P95 ms | 136.2 / 64.51 | 143.9 / 59.56 |
+| 写入与提交秒数 | 545.34 | 679.88 |
+| 逻辑索引 GiB / 服务端峰值 RSS GiB | 2.745 / 5.037 | 2.621 / 4.920 |
+
+两组共 7,459 次计时请求，零错误。3,197,639 段（64.80%）发生转换，393 条原始查询均未改变，因此本数据集的差异来自文档侧归一化。Recall@100 增加 7.06 个百分点：74 条查询改善、36 条退化；nDCG@10 均值提升 10.32%，但 69 条改善、76 条退化，不能认为所有查询都受益。查询延迟存在单轮波动，写入各测一次，不据此宣称稳定的性能提升。
+
+转换预先完成，不计入 HTTP 延迟或写入时间；完整文档转换累计 43.19 秒，查询转换 P95 为 0.00221 ms，整个输入准备阶段为 43.03 / 91.85 秒。它们是客户端测量，不代表接入引擎后的开销。两组都额外传输 `search_body`，写入吞吐不能直接与旧版单字段基线比较。原文返回已通过 HTTP 检查；OpenCC 配置、词典/实现哈希、逐查询指标均保存在 JSON 中。
+
 ## 开发与文档
 
 - [中文测试语料](miracl-corpus-v1.0-zh/README.md)：MIRACL 中文语料，包含 4,934,368 条段落，按 10 个 gzip 分片保存；提供来源、字段说明、读取方法和 SHA-256 校验清单。

@@ -34,6 +34,10 @@ jobs:
           lscpu
       - name: Verify standalone core boundary
         run: python3 scripts/check_core_boundary.py
+      - name: Verify benchmark metrics and streaming loader
+        run: |
+          python3 -m pip install numpy==2.2.6 OpenCC==1.4.2
+          OPENBLAS_NUM_THREADS=1 python3 -B -m unittest discover -s scripts -p test_performance_baseline.py -v
       - name: Build retained workspace
         id: build
         run: cargo build --workspace

@@ -1,0 +1,950 @@
+{
+  "format_version": 1,
+  "started_at": "2026-10-15T14:46:43.092395+00:00",
+  "config": {
+    "documents": 20000,
+    "dimensions": 128,
+    "batch_size": 500,
+    "query_pool": 64,
+    "top_k": 10,
+    "seconds": 5,
+    "repeats": 3,
+    "warmup": 32,
+    "concurrency": [
+      1,
+      4
+    ],
+    "seed": 20261015
+  },
+  "environment": {
+    "engine_commit": "3643330f66bbea7ebf956bbade0a5535256d1fae",
+    "binary_sha256": "9991f60c84dac52e3ddd5f9218e940543a535619b2b1159779c1cc4f7480a2d3",
+    "harness_sha256": "8712911ff4417c51b80cf46c5e28bf41779a5e04530991cecb57b99c307ccd44",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "python": "3.12.14",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  9\nOn-line CPU(s) list:                     0-8\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9V74 80-Core Processor\nBIOS Model name:                           CPU @ 0.0GHz\nBIOS CPU family:                         0\nCPU family:                              25\nModel:                                   17\nThread(s) per core:                      1\nCore(s) per socket:                      9\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5192.25\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx512_bf16 clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm arch_capabilities\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               160 KiB (5 instances)\nL1i cache:                               160 KiB (5 instances)\nL2 cache:                                5 MiB (5 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-8\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Vulnerable: __user pointer sanitization and usercopy barriers only; no swapgs barriers\nVulnerability Spectre v2:                Vulnerable; STIBP: disabled; PBRSB-eIBRS: Not affected; BHI: Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected",
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "cgroup_cpu_max": "800000 100000",
+    "cgroup_memory_max": "8589934592",
+    "cgroup_cpu_stat_before": "usage_usec 4583959253\nuser_usec 3402811962\nsystem_usec 1181147290\nnice_usec 0\nnr_periods 154263\nnr_throttled 645\nthrottled_usec 15075692\nnr_bursts 0\nburst_usec 0",
+    "meminfo": "MemTotal:       10206508 kB\nMemFree:         2482228 kB\nMemAvailable:    9343228 kB\nBuffers:           88944 kB\nCached:          6465592 kB\nSwapCached:            0 kB\nActive:          5753508 kB\nInactive:         990436 kB\nActive(anon):         92 kB\nInactive(anon):   219228 kB\nActive(file):    5753416 kB\nInactive(file):   771208 kB\nUnevictable:       29920 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:               900 kB\nWriteback:             0 kB\nAnonPages:        219128 kB\nMapped:            85064 kB\nShmem:                12 kB\nKReclaimable:     650076 kB\nSlab:             748852 kB\nSReclaimable:     650076 kB\nSUnreclaim:        98776 kB\nKernelStack:        3396 kB\nPageTables:         4620 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     5103252 kB\nCommitted_AS:     644400 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:        4648 kB\nVmallocChunk:          0 kB\nPercpu:             3600 kB\nAnonHugePages:     28672 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:    460800 kB\nFilePmdMapped:         0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      327680 kB\nDirectMap2M:     8261632 kB\nDirectMap1G:    12582912 kB",
+    "filesystem": "Filesystem     Type    1K-blocks     Used Available Use% Mounted on\noverlay        overlay  32978704 22512620   8771980  72% /",
+    "cargo_config": "[build]\nrustflags = [\"-C\", \"target-cpu=native\"]\nrustdocflags = [\"-C\", \"target-cpu=native\"]\n\n[target.x86_64-unknown-linux-gnu]\nrustflags = [\"-C\", \"target-cpu=native\"]\nrustdocflags = [\"-C\", \"target-cpu=native\"]\n\n[target.aarch64-apple-darwin]\nrustflags = [\"-C\", \"debug-assertions=false\"]\n\n[env]\nRUST_TEST_THREADS = \"1\"",
+    "cgroup_cpu_stat_after": "usage_usec 4858019566\nuser_usec 3626272031\nsystem_usec 1231747534\nnice_usec 0\nnr_periods 155216\nnr_throttled 666\nthrottled_usec 15078155\nnr_bursts 0\nburst_usec 0\n"
+  },
+  "dataset": {
+    "numpy_version": "2.3.5",
+    "topics": 64,
+    "words_per_document": 49,
+    "input_json_bytes": 61105695,
+    "input_sha256": "f89265e75d763723d7fed5ccbb021c805f11cbe7028c9f7eefe200a61f709390",
+    "queries_sha256": "bb994d01778fdea9255377f150ee5467834f2255c4c8ef1e5c9f582828053270"
+  },
+  "method": {
+    "transport": "loopback HTTP/1.1 keep-alive, one connection per worker process",
+    "load": "closed-loop; fixed duration; warmed before every repetition",
+    "http_latency": "request send through complete response read; excludes response JSON decode",
+    "qps": "successful completions / wall time, including driver JSON decoding and result collection/drain",
+    "reported_search": "server time field; excludes stored-document materialization/serialization",
+    "rss": "server RSS sampled every 50 ms; includes mapped resident pages",
+    "quality": "vector Recall@K against independent float64 exhaustive cosine; no human relevance labels",
+    "scope": "synthetic, warm cache, default HTTP settings; no cold-cache/filter/update/saturation claim"
+  },
+  "queries": [
+    {
+      "mode": "vector",
+      "concurrency": 1,
+      "repetition": 1,
+      "wall_seconds": 5.002295676000358,
+      "server_cpu_seconds": 6.580000000000002,
+      "server_cpu_cores": 1.3153960553689452,
+      "driver_cpu_cores": 0.28980779863838985,
+      "server_peak_rss_mib": 231.328125,
+      "requests": 7228,
+      "errors": 0,
+      "qps": 1444.9365787548227,
+      "http_latency_ms": {
+        "p50": 0.5192719982005656,
+        "p95": 1.2167519962531514,
+        "p99": 3.0905550011084415
+      },
+      "reported_search_ms": {
+        "p50": 0.276821,
+        "p95": 0.749509,
+        "p99": 2.255156
+      },
+      "mean_response_bytes": 4473.50249031544
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 1,
+      "repetition": 1,
+      "wall_seconds": 5.003315069996461,
+      "server_cpu_seconds": 3.3400000000000034,
+      "server_cpu_cores": 0.6675574000984044,
+      "driver_cpu_cores": 0.4615803771481522,
+      "server_peak_rss_mib": 231.328125,
+      "requests": 15107,
+      "errors": 0,
+      "qps": 3019.3980967923903,
+      "http_latency_ms": {
+        "p50": 0.262304994976148,
+        "p95": 0.5063229982624762,
+        "p99": 0.84830800187774
+      },
+      "reported_search_ms": {
+        "p50": 0.085629,
+        "p95": 0.233722,
+        "p99": 0.463107
+      },
+      "mean_response_bytes": 4464.4040511021385
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 1,
+      "repetition": 1,
+      "wall_seconds": 5.002228728000773,
+      "server_cpu_seconds": 7.149999999999999,
+      "server_cpu_cores": 1.4293628677906576,
+      "driver_cpu_cores": 0.2916755968860155,
+      "server_peak_rss_mib": 231.328125,
+      "requests": 8065,
+      "errors": 0,
+      "qps": 1612.2813326897422,
+      "http_latency_ms": {
+        "p50": 0.49958300223806873,
+        "p95": 0.9919740041368641,
+        "p99": 2.195747998484876
+      },
+      "reported_search_ms": {
+        "p50": 0.276016,
+        "p95": 0.643083,
+        "p99": 1.456765
+      },
+      "mean_response_bytes": 4463.729572225667
+    },
+    {
+      "mode": "vector",
+      "concurrency": 4,
+      "repetition": 1,
+      "wall_seconds": 5.00330491099885,
+      "server_cpu_seconds": 15.849999999999994,
+      "server_cpu_cores": 3.1679060704768705,
+      "driver_cpu_cores": 0.875100590686548,
+      "server_peak_rss_mib": 232.3125,
+      "requests": 23472,
+      "errors": 0,
+      "qps": 4691.299134778115,
+      "http_latency_ms": {
+        "p50": 0.7138210057746619,
+        "p95": 1.4376019971678033,
+        "p99": 2.4723460010136478
+      },
+      "reported_search_ms": {
+        "p50": 0.406839,
+        "p95": 0.934659,
+        "p99": 1.616772
+      },
+      "mean_response_bytes": 4473.5069870483985
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 4,
+      "repetition": 1,
+      "wall_seconds": 5.003659072994196,
+      "server_cpu_seconds": 15.710000000000008,
+      "server_cpu_cores": 3.1397023200062115,
+      "driver_cpu_cores": 0.8540576101726258,
+      "server_peak_rss_mib": 232.375,
+      "requests": 20554,
+      "errors": 0,
+      "qps": 4107.793856486801,
+      "http_latency_ms": {
+        "p50": 0.7747260024189018,
+        "p95": 1.7981579949264415,
+        "p99": 3.3262700017075986
+      },
+      "reported_search_ms": {
+        "p50": 0.451986,
+        "p95": 1.219431,
+        "p99": 2.300475
+      },
+      "mean_response_bytes": 4463.787097401965
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 4,
+      "repetition": 1,
+      "wall_seconds": 5.006252598999708,
+      "server_cpu_seconds": 8.480000000000004,
+      "server_cpu_cores": 1.6938817673112179,
+      "driver_cpu_cores": 1.7683703680411347,
+      "server_peak_rss_mib": 232.375,
+      "requests": 62072,
+      "errors": 0,
+      "qps": 12398.894936384655,
+      "http_latency_ms": {
+        "p50": 0.260532004176639,
+        "p95": 0.46961699990788475,
+        "p99": 0.714864996552933
+      },
+      "reported_search_ms": {
+        "p50": 0.063536,
+        "p95": 0.169841,
+        "p99": 0.304068
+      },
+      "mean_response_bytes": 4464.285619925248
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 1,
+      "repetition": 2,
+      "wall_seconds": 5.003382148002856,
+      "server_cpu_seconds": 3.280000000000001,
+      "server_cpu_cores": 0.6555565621365224,
+      "driver_cpu_cores": 0.4915172731672376,
+      "server_peak_rss_mib": 232.375,
+      "requests": 20333,
+      "errors": 0,
+      "qps": 4063.851090829849,
+      "http_latency_ms": {
+        "p50": 0.20018099894514307,
+        "p95": 0.32004200329538435,
+        "p99": 0.5288559987093322
+      },
+      "reported_search_ms": {
+        "p50": 0.061172,
+        "p95": 0.116019,
+        "p99": 0.27209
+      },
+      "mean_response_bytes": 4464.179363596125
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 4,
+      "repetition": 2,
+      "wall_seconds": 5.004159539996181,
+      "server_cpu_seconds": 17.22,
+      "server_cpu_cores": 3.441137290361678,
+      "driver_cpu_cores": 0.8938940983491135,
+      "server_peak_rss_mib": 232.41796875,
+      "requests": 24447,
+      "errors": 0,
+      "qps": 4885.335850027407,
+      "http_latency_ms": {
+        "p50": 0.7042110009933822,
+        "p95": 1.258174997929018,
+        "p99": 2.1181240008445457
+      },
+      "reported_search_ms": {
+        "p50": 0.419602,
+        "p95": 0.803881,
+        "p99": 1.515842
+      },
+      "mean_response_bytes": 4463.758988832986
+    },
+    {
+      "mode": "vector",
+      "concurrency": 1,
+      "repetition": 2,
+      "wall_seconds": 5.01481852500001,
+      "server_cpu_seconds": 7.599999999999994,
+      "server_cpu_cores": 1.515508479940454,
+      "driver_cpu_cores": 0.3008322677040436,
+      "server_peak_rss_mib": 232.41796875,
+      "requests": 10354,
+      "errors": 0,
+      "qps": 2064.6808949083515,
+      "http_latency_ms": {
+        "p50": 0.42061300337081775,
+        "p95": 0.632373004918918,
+        "p99": 0.9767000010469928
+      },
+      "reported_search_ms": {
+        "p50": 0.234583,
+        "p95": 0.410583,
+        "p99": 0.702818
+      },
+      "mean_response_bytes": 4473.4763376472865
+    },
+    {
+      "mode": "vector",
+      "concurrency": 4,
+      "repetition": 2,
+      "wall_seconds": 5.003963538001699,
+      "server_cpu_seconds": 16.72,
+      "server_cpu_cores": 3.3413512854406258,
+      "driver_cpu_cores": 0.9054751333798513,
+      "server_peak_rss_mib": 232.43359375,
+      "requests": 25109,
+      "errors": 0,
+      "qps": 5017.822334098605,
+      "http_latency_ms": {
+        "p50": 0.686833998770453,
+        "p95": 1.2610840058187023,
+        "p99": 1.959528999577742
+      },
+      "reported_search_ms": {
+        "p50": 0.387484,
+        "p95": 0.789779,
+        "p99": 1.444109
+      },
+      "mean_response_bytes": 4473.506153172169
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 1,
+      "repetition": 2,
+      "wall_seconds": 5.002080179001496,
+      "server_cpu_seconds": 7.569999999999993,
+      "server_cpu_cores": 1.5133703837412498,
+      "driver_cpu_cores": 0.2998311245181565,
+      "server_peak_rss_mib": 232.43359375,
+      "requests": 9868,
+      "errors": 0,
+      "qps": 1972.7792532045794,
+      "http_latency_ms": {
+        "p50": 0.4378990051918663,
+        "p95": 0.691361005010549,
+        "p99": 1.0499209965928458
+      },
+      "reported_search_ms": {
+        "p50": 0.246196,
+        "p95": 0.452161,
+        "p99": 0.693544
+      },
+      "mean_response_bytes": 4463.732569922983
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 4,
+      "repetition": 2,
+      "wall_seconds": 5.009102187999815,
+      "server_cpu_seconds": 8.449999999999989,
+      "server_cpu_cores": 1.68692905092722,
+      "driver_cpu_cores": 1.7621171458920786,
+      "server_peak_rss_mib": 232.4375,
+      "requests": 61431,
+      "errors": 0,
+      "qps": 12263.874381953867,
+      "http_latency_ms": {
+        "p50": 0.26118299865629524,
+        "p95": 0.47103500401135534,
+        "p99": 0.7274149975273758
+      },
+      "reported_search_ms": {
+        "p50": 0.06283,
+        "p95": 0.17227,
+        "p99": 0.323713
+      },
+      "mean_response_bytes": 4464.276863472839
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 4,
+      "repetition": 3,
+      "wall_seconds": 5.00598255800287,
+      "server_cpu_seconds": 7.700000000000017,
+      "server_cpu_cores": 1.5381595742259082,
+      "driver_cpu_cores": 1.607737275099668,
+      "server_peak_rss_mib": 232.4375,
+      "requests": 45579,
+      "errors": 0,
+      "qps": 9104.905874499027,
+      "http_latency_ms": {
+        "p50": 0.29035699844826013,
+        "p95": 0.8952179996413179,
+        "p99": 2.1790669998154044
+      },
+      "reported_search_ms": {
+        "p50": 0.072524,
+        "p95": 0.320243,
+        "p99": 1.034067
+      },
+      "mean_response_bytes": 4464.410232782641
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 4,
+      "repetition": 3,
+      "wall_seconds": 5.003684800001793,
+      "server_cpu_seconds": 15.810000000000002,
+      "server_cpu_cores": 3.1596714485281603,
+      "driver_cpu_cores": 0.8426981477727152,
+      "server_peak_rss_mib": 232.44140625,
+      "requests": 21639,
+      "errors": 0,
+      "qps": 4324.612933251161,
+      "http_latency_ms": {
+        "p50": 0.7512110023526475,
+        "p95": 1.675622996117454,
+        "p99": 2.679764002095908
+      },
+      "reported_search_ms": {
+        "p50": 0.443573,
+        "p95": 1.147417,
+        "p99": 1.953527
+      },
+      "mean_response_bytes": 4463.77392670641
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 1,
+      "repetition": 3,
+      "wall_seconds": 5.002103762002662,
+      "server_cpu_seconds": 7.490000000000009,
+      "server_cpu_cores": 1.4973699779872787,
+      "driver_cpu_cores": 0.2991360389935077,
+      "server_peak_rss_mib": 232.44140625,
+      "requests": 9837,
+      "errors": 0,
+      "qps": 1966.5725598746117,
+      "http_latency_ms": {
+        "p50": 0.43573600123636425,
+        "p95": 0.6848910052212887,
+        "p99": 1.1226750066271052
+      },
+      "reported_search_ms": {
+        "p50": 0.240292,
+        "p95": 0.440929,
+        "p99": 0.736629
+      },
+      "mean_response_bytes": 4463.715360374098
+    },
+    {
+      "mode": "vector",
+      "concurrency": 4,
+      "repetition": 3,
+      "wall_seconds": 5.004088403002243,
+      "server_cpu_seconds": 17.32000000000002,
+      "server_cpu_cores": 3.461169868543639,
+      "driver_cpu_cores": 0.922056744887193,
+      "server_peak_rss_mib": 232.47265625,
+      "requests": 26820,
+      "errors": 0,
+      "qps": 5359.617544707869,
+      "http_latency_ms": {
+        "p50": 0.6506150020868517,
+        "p95": 1.106345996959135,
+        "p99": 1.7780060006771237
+      },
+      "reported_search_ms": {
+        "p50": 0.374835,
+        "p95": 0.692503,
+        "p99": 1.354279
+      },
+      "mean_response_bytes": 4473.501677852349
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 1,
+      "repetition": 3,
+      "wall_seconds": 5.00493638899934,
+      "server_cpu_seconds": 3.049999999999983,
+      "server_cpu_cores": 0.6093983545332897,
+      "driver_cpu_cores": 0.5468072223685481,
+      "server_peak_rss_mib": 232.47265625,
+      "requests": 27628,
+      "errors": 0,
+      "qps": 5520.15007837568,
+      "http_latency_ms": {
+        "p50": 0.144157005706802,
+        "p95": 0.23949099704623222,
+        "p99": 0.3678540015243925
+      },
+      "reported_search_ms": {
+        "p50": 0.037116,
+        "p95": 0.076545,
+        "p99": 0.129334
+      },
+      "mean_response_bytes": 4464.121217605328
+    },
+    {
+      "mode": "vector",
+      "concurrency": 1,
+      "repetition": 3,
+      "wall_seconds": 5.002755712004728,
+      "server_cpu_seconds": 7.329999999999984,
+      "server_cpu_cores": 1.4651924703040662,
+      "driver_cpu_cores": 0.29695876083557127,
+      "server_peak_rss_mib": 232.47265625,
+      "requests": 10211,
+      "errors": 0,
+      "qps": 2041.0750769815622,
+      "http_latency_ms": {
+        "p50": 0.40444899786962196,
+        "p95": 0.672492002195213,
+        "p99": 1.5291009985958226
+      },
+      "reported_search_ms": {
+        "p50": 0.222275,
+        "p95": 0.424824,
+        "p99": 0.938893
+      },
+      "mean_response_bytes": 4473.486044461855
+    }
+  ],
+  "ingest": {
+    "submit": {
+      "wall_seconds": 0.6059044559951872,
+      "server_cpu_seconds": 1.27,
+      "server_cpu_cores": 2.096040039702378,
+      "driver_cpu_cores": 0.06310079686937256,
+      "server_peak_rss_mib": 216.69140625
+    },
+    "commit": {
+      "wall_seconds": 3.443485223004245,
+      "server_cpu_seconds": 23.67,
+      "server_cpu_cores": 6.873849738593991,
+      "driver_cpu_cores": 0.0066922863051797265,
+      "server_peak_rss_mib": 216.81640625
+    },
+    "submit_documents_per_second": 33008.504562242175,
+    "documents_per_second_including_commit": 4939.015897561585
+  },
+  "index": {
+    "create_request": {
+      "index_name": "baseline",
+      "schema": [
+        {
+          "field": "record_id",
+          "field_type": "U32"
+        },
+        {
+          "field": "body",
+          "field_type": "Text"
+        },
+        {
+          "field": "vector",
+          "field_type": "Json",
+          "index_vector": true
+        }
+      ],
+      "vector": {
+        "dimensions": 128
+      }
+    },
+    "info": {
+      "id": 0,
+      "name": "baseline",
+      "schema": [
+        {
+          "field": "body",
+          "field_type": "Text",
+          "store": true,
+          "index_lexical": true,
+          "index_vector": false,
+          "filterable": false,
+          "boost": 1.0
+        },
+        {
+          "field": "record_id",
+          "field_type": "U32",
+          "store": true,
+          "index_lexical": false,
+          "index_vector": false,
+          "filterable": false,
+          "boost": 1.0
+        },
+        {
+          "field": "vector",
+          "field_type": "Json",
+          "store": false,
+          "index_lexical": false,
+          "index_vector": true,
+          "filterable": false,
+          "boost": 1.0
+        }
+      ],
+      "indexed_doc_count": 20000,
+      "committed_doc_count": 20000,
+      "version": "3.4.1"
+    },
+    "logical_bytes": 23547818,
+    "allocated_bytes": 23678976,
+    "metadata": [
+      {
+        "path": "0/0/index.json",
+        "value": {
+          "id": 0,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/3/index.json",
+        "value": {
+          "id": 3,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/2/index.json",
+        "value": {
+          "id": 2,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/5/index.json",
+        "value": {
+          "id": 5,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/4/index.json",
+        "value": {
+          "id": 4,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/0/index.json",
+        "value": {
+          "id": 0,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/6/index.json",
+        "value": {
+          "id": 6,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/1/index.json",
+        "value": {
+          "id": 1,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      },
+      {
+        "path": "0/0/shards/7/index.json",
+        "value": {
+          "id": 7,
+          "name": "baseline",
+          "lexical_similarity": "Bm25fProximity",
+          "tokenizer": "UnicodeAlphanumeric",
+          "stop_words": "None",
+          "frequent_words": "English",
+          "ngram_indexing": 9,
+          "document_compression": "Snappy",
+          "access_type": "Mmap",
+          "clustering": "Auto",
+          "inference": {
+            "External": {
+              "dimensions": 128,
+              "precision": "F32",
+              "quantization": "None",
+              "similarity": "Cosine"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "quality": {
+    "vector_recall_at_k": 1.0,
+    "vector_min_recall_at_k": 1.0,
+    "vector_recall_per_query": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "lexical_count_queries_checked": 64
+  },
+  "finished_at": "2026-10-15T14:48:18.459060+00:00",
+  "summary": [
+    {
+      "mode": "lexical",
+      "concurrency": 1,
+      "qps_median": 4063.851090829849,
+      "qps_min": 3019.3980967923903,
+      "qps_max": 5520.15007837568,
+      "http_latency_ms_median_of_runs": {
+        "p50": 0.20018099894514307,
+        "p95": 0.32004200329538435,
+        "p99": 0.5288559987093322
+      },
+      "server_cpu_cores_median": 0.6555565621365224,
+      "driver_cpu_cores_median": 0.4915172731672376,
+      "server_peak_rss_mib": 232.47265625
+    },
+    {
+      "mode": "lexical",
+      "concurrency": 4,
+      "qps_median": 12263.874381953867,
+      "qps_min": 9104.905874499027,
+      "qps_max": 12398.894936384655,
+      "http_latency_ms_median_of_runs": {
+        "p50": 0.26118299865629524,
+        "p95": 0.47103500401135534,
+        "p99": 0.7274149975273758
+      },
+      "server_cpu_cores_median": 1.68692905092722,
+      "driver_cpu_cores_median": 1.7621171458920786,
+      "server_peak_rss_mib": 232.4375
+    },
+    {
+      "mode": "vector",
+      "concurrency": 1,
+      "qps_median": 2041.0750769815622,
+      "qps_min": 1444.9365787548227,
+      "qps_max": 2064.6808949083515,
+      "http_latency_ms_median_of_runs": {
+        "p50": 0.42061300337081775,
+        "p95": 0.672492002195213,
+        "p99": 1.5291009985958226
+      },
+      "server_cpu_cores_median": 1.4651924703040662,
+      "driver_cpu_cores_median": 0.29695876083557127,
+      "server_peak_rss_mib": 232.47265625
+    },
+    {
+      "mode": "vector",
+      "concurrency": 4,
+      "qps_median": 5017.822334098605,
+      "qps_min": 4691.299134778115,
+      "qps_max": 5359.617544707869,
+      "http_latency_ms_median_of_runs": {
+        "p50": 0.686833998770453,
+        "p95": 1.2610840058187023,
+        "p99": 1.959528999577742
+      },
+      "server_cpu_cores_median": 3.3413512854406258,
+      "driver_cpu_cores_median": 0.9054751333798513,
+      "server_peak_rss_mib": 232.47265625
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 1,
+      "qps_median": 1966.5725598746117,
+      "qps_min": 1612.2813326897422,
+      "qps_max": 1972.7792532045794,
+      "http_latency_ms_median_of_runs": {
+        "p50": 0.4378990051918663,
+        "p95": 0.691361005010549,
+        "p99": 1.1226750066271052
+      },
+      "server_cpu_cores_median": 1.4973699779872787,
+      "driver_cpu_cores_median": 0.2991360389935077,
+      "server_peak_rss_mib": 232.44140625
+    },
+    {
+      "mode": "hybrid",
+      "concurrency": 4,
+      "qps_median": 4324.612933251161,
+      "qps_min": 4107.793856486801,
+      "qps_max": 4885.335850027407,
+      "http_latency_ms_median_of_runs": {
+        "p50": 0.7512110023526475,
+        "p95": 1.675622996117454,
+        "p99": 2.679764002095908
+      },
+      "server_cpu_cores_median": 3.1596714485281603,
+      "driver_cpu_cores_median": 0.8540576101726258,
+      "server_peak_rss_mib": 232.44140625
+    }
+  ]
+}
